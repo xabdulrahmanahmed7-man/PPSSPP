@@ -1,0 +1,126 @@
+name: Build PPSSPP Premium APK
+
+# Run it from the Actions tab: "Build PPSSPP Premium APK" > Run workflow.
+# It applies the Premium UI patch to this fork's code, builds the app and
+# uploads the APK as an artifact. Installs side by side with the original
+# PPSSPP (package name org.ppsspp.premium).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apk:
+    name: Build Premium APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Fetch upstream tags (needed for the version name)
+        shell: bash
+        run: |
+          if [ "0" = "0" ]; then
+            git remote add upstream https://github.com/hrydgard/ppsspp.git
+            git fetch --deepen=15000 --no-recurse-submodules --tags --force upstream || true
+          fi
+
+      - name: Apply Premium patch
+        shell: bash
+        run: |
+          base64 -d <<'B64' | gunzip > premium_patch.py
+          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
+          LQAA
+          B64
+          python3 premium_patch.py
+
+      - name: Setup JDK
+        uses: actions/setup-java@v6.0.1
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Assemble APK
+        run: ./gradlew assembleNormalOptimized --stacktrace
+
+      - name: Package build
+        run: |
+          mkdir premium
+          find . -name "*.apk" -path "*ormal*" -exec cp {} premium/ \;
+          ls -la premium
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ppsspp-premium-apk
+          path: premium/
